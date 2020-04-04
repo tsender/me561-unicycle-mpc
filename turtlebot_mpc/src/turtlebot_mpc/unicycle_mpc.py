@@ -12,8 +12,8 @@ class UnicycleMPC(object):
 
       Notation:
          Kf = final kth time step in the reference trajectory
-         n = 3 = number of states (x, y, theta)
-         m = 2 = number of control inputs (fwd_vel, ang_vel)
+         n = 3 = number of states (x [m], y [m], theta [rad])
+         m = 2 = number of control inputs (fwd_vel [m/s], ang_vel [rad/s])
 
       Assumptions
          1. Robot follows a kinematic unicycle model when using small time-steps
@@ -28,11 +28,11 @@ class UnicycleMPC(object):
          Q: State cost matrix as numpy array of size (n,n)
          QN: Final state cost matrix as numpy array of size (n,n)
          R: Input cost matrix as numpy array of size (m,m)
-         xref: Entire reference trajectory from x0 to xf as numpy array of size (Kf+1, 3), where each row is [xref, yref, theta_ref]
+         xref: Entire reference trajectory from x0 to xf as numpy array of size (Kf+1, 3), where each row is (xref [m], yref [m], theta_ref[rad])
                Note: row 0 corresponds to xref(k=0)
                      row Kf corresponds to xref(k=Kf)
                      padded rows will be equal to xref(k=Kf)
-         uref: Entire reference input from ur0 to urf as numpy array of size (Kf, 2), where each row is [vref, ang_vel_ref]
+         uref: Entire reference input from ur0 to urf as numpy array of size (Kf, 2), where each row is (vref [m/s], ang_vel_ref [rad/s])
                Note: row 0 corresponds to uref(k=0)
                      row Kf-1 corresponds to last control input
                      padded rows will be equal to all 0s

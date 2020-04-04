@@ -45,15 +45,16 @@ include_directories(
 ## Install ##
 #############
 
-## Mark executable scripts (Python etc.) for installation
-## in contrast to setup.py, you can choose the destination
-# install(PROGRAMS
-#   scripts/my_python_script
-#   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
+install(DIRECTORY launch
+        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
 
-# catkin_install_python(PROGRAMS
-#    scripts/thrust_converter_node
-#    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
+install(DIRECTORY cfg
+        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
+
+catkin_install_python(PROGRAMS
+   scripts/turtlebot_mpc_node
+   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 

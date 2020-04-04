@@ -1,0 +1,20 @@
+states_topic: "/gazebo/model_states"
+command_topic: "/command/vel"
+mpc:
+   T: 0.05 # [s]
+   N: 50 # Receding horizon (steps)
+   xmin: [-0.02, -0.02, -0.017] # ([m], [m], [rad])
+   xmax: [0.02, 0.02, 0.017]  # ([m], [m], [rad])
+   umin: [-0.3, -0.785]  # ([m/s], [rad/s])
+   umax: [-0.3, -0.785]  # ([m/s], [rad/s])
+   Q:
+      - [2500, 0, 0]
+      - [0, 2500, 0]
+      - [0, 0, 3300]
+   QN:
+      - [2500, 0, 0]
+      - [0, 2500, 0]
+      - [0, 0, 3300]
+   R:
+      - [2500, 0]
+      - [0, 2500]
