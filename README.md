@@ -30,3 +30,14 @@ Add these lines to the end of your ~/.bahsrc file:
     export TURTLEBOT3_MODEL=burger
     
 Don't forget to source your ~/.bashrc file for the changes to take effect.
+
+# Running the Code
+In one terminal, do
+
+    roslaunch turtlebot_mpc turtlebot_mpc.launch
+    
+In another, do
+
+    rosrun rqt_gui rqt_gui
+
+In rqt_gui, publich a Bool message only ONCE on topic /go_turtlebot_go with a value of True, and then the robot will start moving
