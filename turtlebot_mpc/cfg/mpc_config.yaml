@@ -1,12 +1,14 @@
 model_states_topic: "/gazebo/model_states"
-command_topic: "/command/vel"
+command_topic: "/cmd_vel"
+model_name: "turtlebot3_burger"
+wait_topic: "/go_turtlebot_go"
 mpc:
    T: 0.05 # [s]
-   N: 50 # Receding horizon (steps)
+   N: 25 # Receding horizon (steps)
    xmin: [-0.02, -0.02, -0.017] # ([m], [m], [rad])
    xmax: [0.02, 0.02, 0.017]  # ([m], [m], [rad])
    umin: [-0.3, -0.785]  # ([m/s], [rad/s])
-   umax: [-0.3, -0.785]  # ([m/s], [rad/s])
+   umax: [0.3, 0.785]  # ([m/s], [rad/s])
    Q:
       - [2500, 0, 0]
       - [0, 2500, 0]

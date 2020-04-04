@@ -94,7 +94,7 @@ class UnicycleMPC(object):
       self.Kf = self.uref.shape[0]
       
       # Pad ref trajectory at end with zero rows
-      for i in range(N):
+      for i in range(self.N):
          self.xref = np.append(self.xref, np.zeros((1,3)), axis=0) 
          self.uref = np.append(self.uref, np.zeros((1,2)), axis=0)
       
@@ -114,8 +114,8 @@ class UnicycleMPC(object):
          Matrix A(k) of size (n,n)
       """
       A = np.identity(3)
-      A[0,2] = -self.uref(k,0) * math.sin(self.xref(k,2)) * self.T
-      A[1,2] = self.uref(k,0) * math.cos(self.xref(k,2)) * self.T
+      A[0,2] = -self.uref[k,0] * math.sin(self.xref[k,2]) * self.T
+      A[1,2] = self.uref[k,0] * math.cos(self.xref[k,2]) * self.T
       return A
 
    def Bk(self, k):
@@ -129,9 +129,9 @@ class UnicycleMPC(object):
          Matrix B(k) of size (n,m)
       """
       B = np.zeros((3,2))
-      B[0,0] = math.cos(self.xref(k,2)) * self.T
-      B[1,0] = math.sin(self.xref(k,2)) * self.T
-      B[2,1] = T
+      B[0,0] = math.cos(self.xref[k,2]) * self.T
+      B[1,0] = math.sin(self.xref[k,2]) * self.T
+      B[2,1] = self.T
       return B
 
    def Akjl(self, k, j, l):
@@ -147,7 +147,7 @@ class UnicycleMPC(object):
       """
       Akjl = np.identity(3)
       for i in reversed(range(self.N - j - l + 1)):
-         Akjl = Akjl * self.Ak(k + i)
+         Akjl = Akjl.dot(self.Ak(k + i))
       return Akjl
 
    def Abar(self, k):
@@ -161,7 +161,7 @@ class UnicycleMPC(object):
       """
       Abar = self.Akjl(k, self.N, 0) # A(k)
       for j in reversed(range(1, self.N)): # N-1, N-2, ..., 1
-         Abar = np.vstack(Abar, self.Akjl(k,j,0))
+         Abar = np.vstack((Abar, self.Akjl(k,j,0)))
       return Abar
 
    def Bbar(self, k):
@@ -188,7 +188,7 @@ class UnicycleMPC(object):
          Bkr = self.Bk(k+r)
          for q in range(r+1, self.N): # Down the row groups 1, 2, ..., N-1
             i = q * self.n
-            Bbar[i:i+self.n, j:j+self.m] = self.Akjl(k, self.N-q, r+1) * Bkr
+            Bbar[i:i+self.n, j:j+self.m] = self.Akjl(k, self.N-q, r+1).dot(Bkr)
       return Bbar
 
    def update(self, xk):
@@ -201,7 +201,7 @@ class UnicycleMPC(object):
                   where u = u(k) - uref(k)
       
       Args:
-         x: current state x(k) as numpy array of size (1,3), do NOT subtract xref(k)
+         xk: current state x(k) as numpy array of size (1,3), do NOT subtract xref(k)
 
       Returns (multiple arguments):
          Boolean indicating problem was solved
@@ -213,13 +213,13 @@ class UnicycleMPC(object):
       if self.k >= self.Kf:
          return True, np.zeros((2,1))
 
-      xerr = (xk.reshape(1,self.n) - self.xref[k,:]).reshape(self.n,1)
+      xerr = (xk.reshape(1,self.n) - self.xref[self.k,:]).reshape(self.n,1)
       Abar = self.Abar(self.k)
       Bbar = self.Bbar(self.k)
 
       # QP matrices
       # Recall, np.dot is normal matrix multiplication
-      H = 2 * Bbar.T.dot(self.Qbar).dot(BBar) + self.Rbar # Size (mN, mN)
+      H = 2 * Bbar.T.dot(self.Qbar).dot(Bbar) + self.Rbar # Size (mN, mN)
       f = 2 * Bbar.T.dot(self.Qbar).dot(Abar).dot(xerr) # Size (mN, 1)
 
       # G matrix
@@ -248,9 +248,11 @@ class UnicycleMPC(object):
       u = cp.Variable((self.m * self.N, 1))
       prob = cp.Problem(cp.Minimize(0.5*cp.quad_form(u, H) + f.T * u), [G * u <= w])
       prob.solve()
+      self.k = self.k + 1
 
       if prob.status not in ["infeasible", "unbounded"]:
-         return True, u[0:self.m, 0].value + self.uref[self.k-1, :].reshape(self.m,1)
+         return True, u[0:self.m, 0].value.reshape(-1,1) + self.uref[self.k-1, :].reshape(-1,1)
       else:
+         print("MPC solver: %s" %(prob.status))
          return False, np.zeros((2,1))
       

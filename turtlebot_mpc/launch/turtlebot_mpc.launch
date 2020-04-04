@@ -1,6 +1,11 @@
 <launch>
+   
+   <include file="$(find turtlebot3_gazebo)/launch/turtlebot3_empty_world.launch" />
+   <!--<include file="$(find turtlebot3_teleop)/launch/turtlebot3_teleop_key.launch" />-->
+   
    <node name="turtlebot_mpc_node" pkg="turtlebot_mpc" type="turtlebot_mpc_node" output="screen" >
       <param name="mpc_config_path" value="$(find turtlebot_mpc)/cfg/mpc_config.yaml" />
+      <param name="trajectory_csv_file" value="$(find turtlebot_mpc)/cfg/trajectory.csv" />
       <!--<rosparam command="load" file="$(find turtlebot_mpc)/cfg/mpc_config.yaml" />-->
    </node>
 

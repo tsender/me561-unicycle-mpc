@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
    geometry_msgs
    std_msgs
    gazebo_msgs
+   tf
 )
 
 catkin_python_setup()
@@ -46,13 +47,13 @@ include_directories(
 ## Install ##
 #############
 
-install(DIRECTORY launch
-        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-)
+# install(DIRECTORY launch
+#         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+# )
 
-install(DIRECTORY cfg
-        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-)
+# install(DIRECTORY cfg
+#         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+# )
 
 catkin_install_python(PROGRAMS
    scripts/turtlebot_mpc_node

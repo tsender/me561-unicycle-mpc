@@ -8,7 +8,6 @@ from turtlebot_mpc.turtle_bot_mpc import TurtleBotMPC
 def main():
    rospy.init_node('turtlebot_mpc_node')
    
-   
    cfg_file_path = rospy.get_param("~mpc_config_path")
    cfg = {}
    with open(cfg_file_path, 'r') as stream:
