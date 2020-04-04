@@ -19,6 +19,7 @@ def main():
    rate = 1.0 / cfg['mpc']['T']
    ros_rate = rospy.Rate(rate)
    while not rospy.is_shutdown():
+      mpc.run_controller()
       ros_rate.sleep()
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-states_topic: "/gazebo/model_states"
+model_states_topic: "/gazebo/model_states"
 command_topic: "/command/vel"
 mpc:
    T: 0.05 # [s]

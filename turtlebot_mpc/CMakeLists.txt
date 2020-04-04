@@ -10,6 +10,7 @@ project(turtlebot_mpc)
 find_package(catkin REQUIRED COMPONENTS
    geometry_msgs
    std_msgs
+   gazebo_msgs
 )
 
 catkin_python_setup()

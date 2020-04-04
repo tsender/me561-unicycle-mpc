@@ -7,7 +7,7 @@ import cvxpy as cp
 
 class UnicycleMPC(object):
 
-   def __init__(self, N, T, Q, QN, R, xref, uref, xmin, xmax, umin, umax):
+   def __init__(self, T, N, xmin, xmax, umin, umax, Q, QN, R):
       """Constructor
 
       Notation:
@@ -18,53 +18,34 @@ class UnicycleMPC(object):
       Assumptions
          1. Robot follows a kinematic unicycle model when using small time-steps
          2. Reference trajectory (xref) ends at rest. That is, xref(k=Kf) = 0
-      
-      Notes:
-         1. Do NOT pad the reference trajectory at the end with zeros (this code will take care of that)
 
       Args:
-         N: Receding horizon (integer)
          T: Time step (double)
-         Q: State cost matrix as numpy array of size (n,n)
-         QN: Final state cost matrix as numpy array of size (n,n)
-         R: Input cost matrix as numpy array of size (m,m)
-         xref: Entire reference trajectory from x0 to xf as numpy array of size (Kf+1, 3), where each row is (xref [m], yref [m], theta_ref[rad])
-               Note: row 0 corresponds to xref(k=0)
-                     row Kf corresponds to xref(k=Kf)
-                     padded rows will be equal to xref(k=Kf)
-         uref: Entire reference input from ur0 to urf as numpy array of size (Kf, 2), where each row is (vref [m/s], ang_vel_ref [rad/s])
-               Note: row 0 corresponds to uref(k=0)
-                     row Kf-1 corresponds to last control input
-                     padded rows will be equal to all 0s
+         N: Receding horizon (integer)
          xmin: Min values of (x - xref) as numpy array of size (1,3)
          xmax: Max values of (x - xref) as numpy array of size (1,3)
          umin: Min values of (u - uref) as numpy array of size (1,2)
          umax: Max values of (u - uref) as numpy array of size (1,2)
+         Q: State cost matrix as numpy array of size (n,n)
+         QN: Final state cost matrix as numpy array of size (n,n)
+         R: Input cost matrix as numpy array of size (m,m)
       """
       self.n = 3 # 3 states (x, y, theta)
       self.m = 2 # 2 inputs (fwd_vel, ang_vel)
       self.k = 0 # Time step k
 
-      self.N = N
       self.T = T
+      self.N = N
+      self.xmin = xmin.reshape(1,3)
+      self.xmax = xmax.reshape(1,3)
+      self.umin = umin.reshape(1,2)
+      self.umax = umax.reshape(1,2)
       self.Q = Q
       self.QN = QN
       self.R = R
-      self.xref = xref
-      self.uref = uref
-      self.xmin = xmin.reshpe(1,3)
-      self.xmax = xmax.reshpe(1,3)
-      self.umin = umin.reshpe(1,2)
-      self.umax = umax.reshpe(1,2)
-
-      self.Kf = self.uref.shape[0]
-      
-      # Pad ref trajectory at end with zero rows
-      for i in range(N):
-         self.xref = np.append(self.xref, np.zeros((1,3)), axis=0) 
-         self.uref = np.append(self.uref, np.zeros((1,2)), axis=0)
 
       self.set_QR_cost_matrices()
+      self.init = False
       
    def set_QR_cost_matrices(self):
       """Setup Qbar and Rbar matrices needed by QP problem"""
@@ -76,13 +57,51 @@ class UnicycleMPC(object):
          j = i * self.n
          k = i * self.m
          self.Qbar[j:j+self.n, j:j+self.n] = self.Q
-         self.Rbar[k:k+self.n, k:k+self.n] = self.R
+         self.Rbar[k:k+self.m, k:k+self.m] = self.R
 
          if i == self.N-2:
             j = j + self.n
             k = k + self.m
             self.Qbar[j:j+self.n, j:j+self.n] = self.QN
-            self.Rbar[k:k+self.n, k:k+self.n] = self.R
+            self.Rbar[k:k+self.m, k:k+self.m] = self.R
+
+   def set_ref_trajectory(self, xref, uref):
+      """Set the reference trajectory
+
+      Notation:
+         Kf = final kth time step in the reference trajectory
+
+      Notes:
+         1. Do NOT pad the reference trajectory at the end with zeros (this code will take care of that)
+         2. Reference trajectory (xref) must at rest. That is, xref(k=Kf) = 0
+
+      Args:
+         xref: Entire reference trajectory from x0 to xf as numpy array of size (Kf+1, 3), where each row is (xref [m], yref [m], theta_ref[rad])
+               Note: row 0 corresponds to xref(k=0)
+                     row Kf corresponds to xref(k=Kf)
+                     padded rows will be equal to xref(k=Kf)
+         uref: Entire reference input from ur0 to urf as numpy array of size (Kf, 2), where each row is (vref [m/s], ang_vel_ref [rad/s])
+               Note: row 0 corresponds to uref(k=0)
+                     row Kf-1 corresponds to last control input
+                     padded rows will be equal to all 0s
+      """
+      if xref.shape[0] != uref.shape[0] + 1:
+         print("Xref shape should have one more row than uref")
+         return False
+      
+      self.xref = xref
+      self.uref = uref
+      self.Kf = self.uref.shape[0]
+      
+      # Pad ref trajectory at end with zero rows
+      for i in range(N):
+         self.xref = np.append(self.xref, np.zeros((1,3)), axis=0) 
+         self.uref = np.append(self.uref, np.zeros((1,2)), axis=0)
+      
+      self.init = True
+      self.k = 0
+
+      return True
 
    def Ak(self, k):
       """Discrete LTV system: x(k+1) = A(k)*x(k) + B(k)*u(k)
@@ -186,8 +205,11 @@ class UnicycleMPC(object):
 
       Returns (multiple arguments):
          Boolean indicating problem was solved
-         Control input u(k) = uerr + uref(k) to apply to the system (Note: uref has been added back)
+         Control input u(k) = uerr + uref(k) to apply to the system as numpy (2,1) array (Note: uref has been added back)
       """
+      if not self.init:
+         return False, np.zeros((2,1))
+      
       if self.k >= self.Kf:
          return True, np.zeros((2,1))
 
