@@ -7,7 +7,10 @@ This is a ROS repo intended to develop a MPC controller for the turtlebot.
 
 ## Dependenies
 
-This library requires ROS and [CVXOPT](https://cvxopt.org/install/index.html)
+This library requires ROS and [CVXPY](https://www.cvxpy.org/install/index.html)
+Note: to install CVXPY, if you get an error about user permissions, execute 
+        
+        pip install cvxpy --user
 
 ## Building
 The recommended way to build/install this library is with [Catkin tools](https://catkin-tools.readthedocs.io/en/latest/installing.html).
