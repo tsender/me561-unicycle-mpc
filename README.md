@@ -21,13 +21,12 @@ Clone this repo into a src folder and build with catkin tools:
     cd ~/catkin_ws/me561-unicycle-mpc/
     git clone --recursive https://github.com/tsender/me561-unicycle-mpc.git src
     catkin init
-    catkin config --install
     catkin build
     
 ## Post Setup
 Add these lines to the end of your ~/.bahsrc file:
 
-    source ~/catkin_ws/me561-unicycle-mpc/install/setup.bash
+    source ~/catkin_ws/me561-unicycle-mpc/devel/setup.bash
     export TURTLEBOT3_MODEL=burger
     
 Don't forget to source your ~/.bashrc file for the changes to take effect.
