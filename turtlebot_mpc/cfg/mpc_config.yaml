@@ -2,13 +2,14 @@ model_states_topic: "/gazebo/model_states"
 command_topic: "/cmd_vel"
 model_name: "turtlebot3_burger"
 wait_topic: "/go_turtlebot_go"
+debug: True # Set to True when you wish to test MPC code with the test reference trajectory
 mpc:
    T: 0.05 # [s]
-   N: 25 # Receding horizon (steps)
-   xmin: [-0.02, -0.02, -0.017] # ([m], [m], [rad])
-   xmax: [0.02, 0.02, 0.017]  # ([m], [m], [rad])
-   umin: [-0.3, -0.785]  # ([m/s], [rad/s])
-   umax: [0.3, 0.785]  # ([m/s], [rad/s])
+   N: 20 # Receding horizon (steps), N > 20 seems to require too much CPU power
+   xmin: [-0.04, -0.04, -0.034] # Min ERROR from reference trajectory ([m], [m], [rad])
+   xmax: [0.04, 0.04, 0.034]  # max ERROR from reference trjectory ([m], [m], [rad])
+   umin: [-0.3, -0.785]  # Min control input ([m/s], [rad/s])
+   umax: [0.3, 0.785]  # Max control input ([m/s], [rad/s])
    Q:
       - [2500, 0, 0]
       - [0, 2500, 0]

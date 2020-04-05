@@ -38,8 +38,10 @@ class TurtleBotMPC(object):
       self.wait_sub = rospy.Subscriber(self.cfg['wait_topic'], Bool, self.wait_for_signal_cb, queue_size=1)
       self.cmd_pub = rospy.Publisher(cfg['command_topic'], Twist, queue_size=1)
 
-      self.make_test_trajectory()
-      rospy.loginfo("TurltebotMPC: initialized")
+      if cfg['debug']:
+         self.make_test_trajectory()
+
+      rospy.loginfo("TurltebotMPC: Initialized")
 
    def model_state_cb(self, msg):
       """Retrieve model states for turtlebot from gazebo"""
@@ -50,7 +52,7 @@ class TurtleBotMPC(object):
                self.model_found = True
 
       if not self.model_found:
-         rospy.logwarn("TurtleBotMPC: model '%s' not found in '%s'", self.model_name, self.cfg['model_states_topic'])
+         rospy.logwarn("TurtleBotMPC: Model '%s' not found in '%s'", self.model_name, self.cfg['model_states_topic'])
          return
 
       # Grab current vehicle state
@@ -65,7 +67,7 @@ class TurtleBotMPC(object):
       """Ensures robot doesn't start moving until told to do so"""
       if msg.data:
          self.init = True
-         rospy.loginfo("Turlebot MPC: wait signal received")
+         rospy.loginfo("Turlebot MPC: Go signal received")
 
    def make_test_trajectory(self):
       """Make simple test trajectory of moving forward 2 m
@@ -88,19 +90,15 @@ class TurtleBotMPC(object):
          uref = np.concatenate([uref, uk])
       uref = np.delete(uref, 0, 0)
 
-      print("xref")
-      print xref
-      print("uref")
-      print uref
-
       self.mpc.set_ref_trajectory(xref, uref)
+      print("TurtleBotMPC: Test ref trajectory set")
 
    def run_controller(self):
       """Run MPC controller"""
       if not self.model_found or not self.init:
          return
 
-      rospy.loginfo("Turtlebot MPC: running MPC")
+      rospy.loginfo("Turtlebot MPC: Running MPC")
       status, u = self.mpc.update(self.xstate)
       u = u.flatten()
       print("Control")

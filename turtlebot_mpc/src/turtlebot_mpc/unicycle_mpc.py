@@ -229,8 +229,10 @@ class UnicycleMPC(object):
       # W Vector
       w1 = (self.umax - self.uref[self.k:self.k + self.N, :]).flatten().reshape(-1,1) # Flatten into 2D col vector
       w2 = (-self.umin + self.uref[self.k:self.k + self.N, :]).flatten().reshape(-1,1)
-      w3 = (self.xmax - self.xref[self.k:self.k + self.N, :]).flatten().reshape(-1,1) - Abar.dot(xerr)
-      w4 = (-self.xmin + self.xref[self.k:self.k + self.N, :]).flatten().reshape(-1,1) + Abar.dot(xerr)
+      # w3 = (self.xmax - self.xref[self.k:self.k + self.N, :]).flatten().reshape(-1,1) - Abar.dot(xerr)
+      # w4 = (-self.xmin + self.xref[self.k:self.k + self.N, :]).flatten().reshape(-1,1) + Abar.dot(xerr)
+      w3 = np.tile(self.xmax.reshape(-1,1), (self.N, 1)) - Abar.dot(xerr)
+      w4 = np.tile(-self.xmin.reshape(-1,1), (self.N, 1)) + Abar.dot(xerr)
       w = np.concatenate([w1, w2, w3, w4]) # Size (2mN + 2nN, 1)
 
       # # Setup and solve QP problem
