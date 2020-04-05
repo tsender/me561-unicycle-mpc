@@ -24,7 +24,7 @@ Clone this repo into a src folder and build with catkin tools:
     catkin build
     
 ## Post Setup
-Add these lines to the end of your ~/.bahsrc file:
+Add these lines to the end of your ~/.bashrc file:
 
     source ~/catkin_ws/me561-unicycle-mpc/devel/setup.bash
     export TURTLEBOT3_MODEL=burger
