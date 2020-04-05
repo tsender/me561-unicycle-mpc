@@ -24,8 +24,8 @@ class UnicycleMPC(object):
          N: Receding horizon (integer)
          xmin: Min values of (x - xref) as numpy array of size (1,3)
          xmax: Max values of (x - xref) as numpy array of size (1,3)
-         umin: Min values of (u - uref) as numpy array of size (1,2)
-         umax: Max values of (u - uref) as numpy array of size (1,2)
+         umin: Min values of control input u as numpy array of size (1,2)
+         umax: Max values of control input u as numpy array of size (1,2)
          Q: State cost matrix as numpy array of size (n,n)
          QN: Final state cost matrix as numpy array of size (n,n)
          R: Input cost matrix as numpy array of size (m,m)
@@ -95,7 +95,7 @@ class UnicycleMPC(object):
       
       # Pad ref trajectory at end with zero rows
       for i in range(self.N):
-         self.xref = np.append(self.xref, np.zeros((1,3)), axis=0) 
+         self.xref = np.append(self.xref, np.zeros((1,3)), axis=0)
          self.uref = np.append(self.uref, np.zeros((1,2)), axis=0)
       
       self.init = True

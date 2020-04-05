@@ -8,8 +8,8 @@ mpc:
    N: 20 # Receding horizon (steps), N > 20 seems to require too much CPU power
    xmin: [-0.04, -0.04, -0.034] # Min ERROR from reference trajectory ([m], [m], [rad])
    xmax: [0.04, 0.04, 0.034]  # max ERROR from reference trjectory ([m], [m], [rad])
-   umin: [-0.3, -0.785]  # Min control input ([m/s], [rad/s])
-   umax: [0.3, 0.785]  # Max control input ([m/s], [rad/s])
+   umin: [-0.3, -0.785]  # Min absolute control input ([m/s], [rad/s])
+   umax: [0.3, 0.785]  # Max absolute control input ([m/s], [rad/s])
    Q:
       - [2500, 0, 0]
       - [0, 2500, 0]
