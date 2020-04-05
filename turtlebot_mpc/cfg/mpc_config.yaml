@@ -2,7 +2,7 @@ model_states_topic: "/gazebo/model_states"
 command_topic: "/cmd_vel"
 model_name: "turtlebot3_burger"
 wait_topic: "/go_turtlebot_go"
-debug: True # Set to True when you wish to test MPC code with the test reference trajectory
+debug: False # Set to True when you wish to test MPC code with the test reference trajectory
 mpc:
    T: 0.05 # [s]
    N: 20 # Receding horizon (steps), N > 20 seems to require too much CPU power
