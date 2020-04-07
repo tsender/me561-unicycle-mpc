@@ -258,3 +258,4 @@ class UnicycleMPC(object):
          print("MPC solver: %s" %(prob.status))
          return False, np.zeros((2,1))
       
+# Tune Qbar: Have exponentials Q's alsong the diagonal, see if state errors can be reduced
