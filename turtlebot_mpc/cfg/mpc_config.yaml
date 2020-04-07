@@ -3,21 +3,41 @@ command_topic: "/cmd_vel"
 model_name: "turtlebot3_burger"
 wait_topic: "/go_turtlebot_go"
 debug: False # Set to True when you wish to test MPC code with the test reference trajectory
+perpendicular: False
+parallel: True
 mpc:
    T: 0.05 # [s]
    N: 20 # Receding horizon (steps), N > 20 seems to require too much CPU power
-   xmin: [-0.04, -0.04, -0.034] # Min ERROR from reference trajectory ([m], [m], [rad])
-   xmax: [0.04, 0.04, 0.034]  # max ERROR from reference trjectory ([m], [m], [rad])
-   umin: [-0.3, -0.785]  # Min absolute control input ([m/s], [rad/s])
-   umax: [0.3, 0.785]  # Max absolute control input ([m/s], [rad/s])
-   Q:
-      - [2500, 0, 0]
-      - [0, 2500, 0]
-      - [0, 0, 3300]
-   QN:
-      - [2500, 0, 0]
-      - [0, 2500, 0]
-      - [0, 0, 3300]
-   R:
-      - [2500, 0]
-      - [0, 2500]
+   xmin1: [-0.4, -0.5, -0.45] # Min ERROR from reference trajectory ([m], [m], [rad])
+   xmax1: [0.4, 0.5, 0.45]  # max ERROR from reference trjectory ([m], [m], [rad])
+   umin1: [-1, -0.8]  # Min absolute control input ([m/s], [rad/s])
+   umax1: [1, 0.8]  # Max absolute control input ([m/s], [rad/s])
+   Q1:
+      - [400, 0, 0]
+      - [0, 400, 0]
+      - [0, 0, 200]
+   QN1:
+      - [400, 0, 0]
+      - [0, 400, 0]
+      - [0, 0, 200]
+   R1:
+      - [100, 0]
+      - [0, 100]
+
+   xmin2: [-1, -1, -1] # Min ERROR from reference trajectory ([m], [m], [rad])
+   xmax2: [1, 1, 1]  # max ERROR from reference trjectory ([m], [m], [rad])
+   umin2: [-1, -0.8]  # Min absolute control input ([m/s], [rad/s])
+   umax2: [1, 0.8]  # Max absolute control input ([m/s], [rad/s])
+   Q2:
+      - [1, 0, 0]
+      - [0, 1, 0]
+      - [0, 0, 1]
+   QN2:
+      - [1, 0, 0]
+      - [0, 1, 0]
+      - [0, 0, 1]
+   R2:
+      - [1, 0]
+      - [0, 1]
+
+# State error can be further reduced, tune Qbar and Rbar
