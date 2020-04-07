@@ -2,7 +2,9 @@
 
 import rospy
 import tf
+import csv
 import numpy as np
+from numpy import genfromtxt
 import matplotlib as plt
 from turtlebot_mpc.unicycle_mpc import UnicycleMPC
 from geometry_msgs.msg import Twist, Pose, Quaternion
@@ -16,14 +18,25 @@ class TurtleBotMPC(object):
       self.T = cfg['mpc']['T']
       self.N = int(cfg['mpc']['N'])
       
-      self.xmin = np.array(cfg['mpc']['xmin']).astype(np.float32)
-      self.xmax = np.array(cfg['mpc']['xmax']).astype(np.float32)
-      self.umin = np.array(cfg['mpc']['umin']).astype(np.float32)
-      self.umax = np.array(cfg['mpc']['umax']).astype(np.float32)
+      if cfg['perpendicular']:
+         self.xmin = np.array(cfg['mpc']['xmin1']).astype(np.float32)
+         self.xmax = np.array(cfg['mpc']['xmax1']).astype(np.float32)
+         self.umin = np.array(cfg['mpc']['umin1']).astype(np.float32)
+         self.umax = np.array(cfg['mpc']['umax1']).astype(np.float32)
 
-      self.Q = np.array(cfg['mpc']['Q']).astype(np.float32)
-      self.QN = np.array(cfg['mpc']['QN']).astype(np.float32)
-      self.R = np.array(cfg['mpc']['R']).astype(np.float32)
+         self.Q = np.array(cfg['mpc']['Q1']).astype(np.float32)
+         self.QN = np.array(cfg['mpc']['QN1']).astype(np.float32)
+         self.R = np.array(cfg['mpc']['R1']).astype(np.float32)
+
+      if cfg['parallel']:
+         self.xmin = np.array(cfg['mpc']['xmin2']).astype(np.float32)
+         self.xmax = np.array(cfg['mpc']['xmax2']).astype(np.float32)
+         self.umin = np.array(cfg['mpc']['umin2']).astype(np.float32)
+         self.umax = np.array(cfg['mpc']['umax2']).astype(np.float32)
+
+         self.Q = np.array(cfg['mpc']['Q2']).astype(np.float32)
+         self.QN = np.array(cfg['mpc']['QN2']).astype(np.float32)
+         self.R = np.array(cfg['mpc']['R2']).astype(np.float32)
 
       self.mpc = UnicycleMPC(self.T, self.N, self.xmin, self.xmax, self.umin, self.umax, self.Q, self.QN, self.R)
 
@@ -40,6 +53,8 @@ class TurtleBotMPC(object):
 
       if cfg['debug']:
          self.make_test_trajectory()
+      else:
+         self.reference_trajectory(cfg)
 
       rospy.loginfo("TurltebotMPC: Initialized")
 
@@ -70,9 +85,6 @@ class TurtleBotMPC(object):
          rospy.loginfo("Turlebot MPC: Go signal received")
 
    def make_test_trajectory(self):
-      """Make simple test trajectory of moving forward 2 m
-      xref(0) = [0, 0, 0] --> xref(Kf) = [0, 2, 0]
-      """
       xf = 2.0
       xvel = 0.2
       Tf = xf / xvel
@@ -89,10 +101,42 @@ class TurtleBotMPC(object):
          xref = np.concatenate([xref, xk])
          uref = np.concatenate([uref, uk])
       uref = np.delete(uref, 0, 0)
-
+      print(len(xref))
+      print(len(uref))
       self.mpc.set_ref_trajectory(xref, uref)
       print("TurtleBotMPC: Test ref trajectory set")
 
+   def reference_trajectory(self,cfg):
+      """
+      xref(0)  --> xref(Kf) 
+      uref(0)  --> uref(Kf-1) 
+      """
+
+      #with open(xref_file_path, 'r') as f:
+      #   reader = csv.reader(f, delimiter=',')
+      #   headers = next(reader)
+      #   xref = np.array(list(reader)).astype(float)
+      #with open(uref_file_path, 'r') as f:
+      #   reader = csv.reader(f, delimiter=',')
+      #   headers = next(reader)
+      #   uref = np.array(list(reader)).astype(float)
+      #self.mpc.set_ref_trajectory(xref, uref)
+
+      if cfg['perpendicular']:
+         xref_file_path = rospy.get_param("~xref_perp_path")
+         uref_file_path = rospy.get_param("~uref_perp_path")
+         xref = genfromtxt(xref_file_path, delimiter=',')
+         uref = genfromtxt(uref_file_path, delimiter=',')
+
+      if cfg['parallel']:
+         xref_file_path = rospy.get_param("~xref_par_path")
+         uref_file_path = rospy.get_param("~uref_par_path")
+         xref = genfromtxt(xref_file_path, delimiter=',')
+         uref = genfromtxt(uref_file_path, delimiter=',')
+
+      self.mpc.set_ref_trajectory(xref, uref)
+      print("TurtleBotMPC: Ref trajectory set")
+   
    def run_controller(self):
       """Run MPC controller"""
       if not self.model_found or not self.init:
@@ -111,5 +155,4 @@ class TurtleBotMPC(object):
 
       
       
-      
-
+# Plot MPC trajectory along with the reference trajectory,tune Qbar and Rbar, reduce state errors
