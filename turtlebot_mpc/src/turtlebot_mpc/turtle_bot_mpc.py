@@ -3,8 +3,9 @@
 import rospy
 import tf
 import csv
+from csv import writer
 import numpy as np
-from numpy import genfromtxt
+from numpy import genfromtxt, savetxt
 import matplotlib as plt
 from turtlebot_mpc.unicycle_mpc import UnicycleMPC
 from geometry_msgs.msg import Twist, Pose, Quaternion
@@ -96,10 +97,10 @@ class TurtleBotMPC(object):
       xref = zero3
       uref = zero2
       for k in range(1, int(Kf)+1):
-         xk = np.array([[xvel * self.T * float(k), 0., 0.]])
-         uk = np.array([[xvel, 0.]])
-         xref = np.concatenate([xref, xk])
-         uref = np.concatenate([uref, uk])
+         xk1 = np.array([[xvel * self.T * float(k), 0., 0.]])
+         uk1 = np.array([[xvel, 0.]])
+         xref = np.concatenate([xref, xk1])
+         uref = np.concatenate([uref, uk1])
       uref = np.delete(uref, 0, 0)
       print(len(xref))
       print(len(uref))
@@ -139,20 +140,41 @@ class TurtleBotMPC(object):
    
    def run_controller(self):
       """Run MPC controller"""
-      if not self.model_found or not self.init:
-         return
-
+      if not self.model_found or not self.init:     
+         return 
+      
       rospy.loginfo("Turtlebot MPC: Running MPC")
       status, u = self.mpc.update(self.xstate)
       u = u.flatten()
       print("Control")
       print u
-
+      xk = (self.xstate).reshape(1,-1)
+      uk = u.reshape(1,-1)
+      #print(xk)
+      #np.savetxt('mpc_state.csv',xk,delimiter=',')
+      #np.savetxt('mpc_input.csv',uk,delimiter=',')
       cmd = Twist()
       cmd.linear.x = u[0]
       cmd.angular.z = u[1]
       self.cmd_pub.publish(cmd)
+      self.append_list_as_row('mpc_state.csv', xk)
 
+   def append_list_as_row(self,file_name, list_of_elem):
+      self.file_name = file_name
+      self.list_of_elem = list_of_elem
       
+      #Method 1
+      #with open(file_name, "a") as myfile:
+      #   myfile.write(list_of_elem)
       
-# Plot MPC trajectory along with the reference trajectory,tune Qbar and Rbar, reduce state errors
+      #Method 2
+      # Open file in append mode
+      with open(file_name, 'a') as write_obj:
+         # Create a writer object from csv module
+         csv_writer = writer(write_obj)
+         # Add contents of list as last row in the csv file
+         csv_writer.writerow(list_of_elem)
+      
+   #TODO: Save MPC state trajectory in a CSV file. The above methods are not working.
+      
+
