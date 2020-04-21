@@ -7,8 +7,8 @@
       <param name="mpc_config_path" value="$(find turtlebot_mpc)/cfg/mpc_config.yaml" />
       <param name="xref_perp_path" value="$(find turtlebot_mpc)/cfg/state.csv" />
       <param name="uref_perp_path" value="$(find turtlebot_mpc)/cfg/input.csv" />
-      <param name="xref_par_path" value="$(find turtlebot_mpc)/cfg/state2.csv" />
-      <param name="uref_par_path" value="$(find turtlebot_mpc)/cfg/input2.csv" />
+      <param name="xref_par_path" value="$(find turtlebot_mpc)/cfg/state3.csv" />
+      <param name="uref_par_path" value="$(find turtlebot_mpc)/cfg/input3.csv" />
 
       <!--<rosparam command="load" file="$(find turtlebot_mpc)/cfg/mpc_config.yaml" />-->
    </node>
