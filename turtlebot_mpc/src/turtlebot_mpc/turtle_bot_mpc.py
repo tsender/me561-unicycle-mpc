@@ -143,13 +143,13 @@ class TurtleBotMPC(object):
       if not self.model_found or not self.init:     
          return 
       
-      rospy.loginfo("Turtlebot MPC: Running MPC")
+      #rospy.loginfo("Turtlebot MPC: Running MPC")
       status, u = self.mpc.update(self.xstate)
       u = u.flatten()
-      print("Control")
+      #print("Control")
       print u
-      xk = (self.xstate).reshape(1,-1)
-      uk = u.reshape(1,-1)
+      #xk = (self.xstate).reshape(1,-1)
+      #uk = u.reshape(1,-1)
       #print(xk)
       #np.savetxt('mpc_state.csv',xk,delimiter=',')
       #np.savetxt('mpc_input.csv',uk,delimiter=',')
@@ -157,11 +157,11 @@ class TurtleBotMPC(object):
       cmd.linear.x = u[0]
       cmd.angular.z = u[1]
       self.cmd_pub.publish(cmd)
-      self.append_list_as_row('mpc_state.csv', xk)
+      #self.append_list_as_row('mpc_state.csv', xk)
 
-   def append_list_as_row(self,file_name, list_of_elem):
-      self.file_name = file_name
-      self.list_of_elem = list_of_elem
+   #def append_list_as_row(self,file_name, list_of_elem):
+   #   self.file_name = file_name
+   #   self.list_of_elem = list_of_elem
       
       #Method 1
       #with open(file_name, "a") as myfile:
@@ -169,12 +169,11 @@ class TurtleBotMPC(object):
       
       #Method 2
       # Open file in append mode
-      with open(file_name, 'a') as write_obj:
+   #   with open(file_name, 'a') as write_obj:
          # Create a writer object from csv module
-         csv_writer = writer(write_obj)
+   #      csv_writer = writer(write_obj)
          # Add contents of list as last row in the csv file
-         csv_writer.writerow(list_of_elem)
+   #      csv_writer.writerow(list_of_elem)
       
-   #TODO: Save MPC state trajectory in a CSV file. The above methods are not working.
       
-
+      
