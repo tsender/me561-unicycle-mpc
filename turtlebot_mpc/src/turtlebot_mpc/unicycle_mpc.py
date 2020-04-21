@@ -56,13 +56,13 @@ class UnicycleMPC(object):
       for i in range(self.N-1):
          j = i * self.n
          k = i * self.m
-         self.Qbar[j:j+self.n, j:j+self.n] = self.Q
+         self.Qbar[j:j+self.n, j:j+self.n] = self.Q   #math.pow(2,i)*self.Q
          self.Rbar[k:k+self.m, k:k+self.m] = self.R
 
          if i == self.N-2:
             j = j + self.n
             k = k + self.m
-            self.Qbar[j:j+self.n, j:j+self.n] = self.QN
+            self.Qbar[j:j+self.n, j:j+self.n] = self.QN    #math.pow(2,i+1)*self.Q
             self.Rbar[k:k+self.m, k:k+self.m] = self.R
 
    def set_ref_trajectory(self, xref, uref):
@@ -258,4 +258,3 @@ class UnicycleMPC(object):
          print("MPC solver: %s" %(prob.status))
          return False, np.zeros((2,1))
       
-# Tune Qbar: Have exponentials Q's alsong the diagonal, see if state errors can be reduced
